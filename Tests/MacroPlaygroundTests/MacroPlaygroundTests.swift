@@ -4,30 +4,101 @@ import XCTest
 import MacroPlaygroundMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "FatalCoderInit": FatalCoderInit.self,
 ]
 
 final class MacroPlaygroundTests: XCTestCase {
-    func testMacro() {
+    func testMacroBaseline() {
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @FatalCoderInit
+            class A: UIView {
+            }
             """,
             expandedSource: """
-            (a + b, "a + b")
+            
+            class A: UIView {
+                required init?(coder: NSCoder) {
+                    fatalError("Not implemented")
+                }
+            }
             """,
             macros: testMacros
         )
     }
 
-    func testMacroWithStringLiteral() {
+    func testMacroKeepsClassDeclModifiers() {
         assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
+            """
+            @FatalCoderInit
+            fileprivate final class A: UIView {
+            }
+            """,
+            expandedSource: """
+            
+            fileprivate final class A: UIView {
+                required init?(coder: NSCoder) {
+                    fatalError("Not implemented")
+                }
+            }
+            """,
+            macros: testMacros
+        )
+        assertMacroExpansion(
+            """
+            @FatalCoderInit
+            public class A: NSView {
+            }
+            """,
+            expandedSource: """
+            
+            public class A: NSView {
+                required init?(coder: NSCoder) {
+                    fatalError("Not implemented")
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
+    func testMacroAddsPublicModifierForOpenClassDecl() {
+        assertMacroExpansion(
+            """
+            @FatalCoderInit
+            open class A: UIView {
+            }
+            """,
+            expandedSource: """
+            
+            open class A: UIView {
+                public required init?(coder: NSCoder) {
+                    fatalError("Not implemented")
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
+    func testMacroErrorsOnNonClass() {
+        assertMacroExpansion(
+            """
+            @FatalCoderInit
+            struct A {
+            }
+            """,
+            expandedSource: """
+            
+            struct A {
+            }
+            """,
+            diagnostics: [
+                DiagnosticSpec(
+                    message: "@FatalCoderInit can only be applied to a class",
+                    line: 1, column: 1
+                )
+            ],
             macros: testMacros
         )
     }

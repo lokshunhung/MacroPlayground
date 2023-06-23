@@ -1,8 +1,20 @@
 import MacroPlayground
+import Cocoa
 
-let a = 17
-let b = 25
+//@FatalCoderInit
+open class A: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: .zero)
+    }
 
-let (result, code) = #stringify(a + b)
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
-print("The value \(result) was produced by the code \"\(code)\"")
+@FatalCoderInit
+open class B: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: .zero)
+    }
+}

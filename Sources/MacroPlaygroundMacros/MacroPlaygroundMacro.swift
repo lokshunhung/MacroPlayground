@@ -3,31 +3,78 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-/// Implementation of the `stringify` macro, which takes an expression
-/// of any type and produces a tuple containing the value of that expression
-/// and the source code that produced the value. For example
-///
-///     #stringify(x + y)
-///
-///  will expand to
-///
-///     (x + y, "x + y")
-public struct StringifyMacro: ExpressionMacro {
+public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
     public static func expansion(
-        of node: some FreestandingMacroExpansionSyntax,
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
-    ) -> ExprSyntax {
-        guard let argument = node.argumentList.first?.expression else {
-            fatalError("compiler bug: the macro does not have any arguments")
-        }
+    ) throws -> [DeclSyntax] {
+        guard let classDecl = declaration.as(ClassDeclSyntax.self) else { throw Error.onlyApplicableToClass }
+        let declModifiers: [Keyword] = classDecl.modifiers?.map(\.name.tokenKind).compactMap { tokenKind in
+            guard case TokenKind.keyword(let keyword) = tokenKind else { return nil }
+            return keyword
+        } ?? []
+        return [
+            DeclSyntax(InitializerDeclSyntax(
+                modifiers: ModifierListSyntax(itemsBuilder: {
+                    if declModifiers.contains(where: { $0 == .open }) {
+                        DeclModifierSyntax(name: .keyword(.public))
+                    }
+                    DeclModifierSyntax(name: .keyword(.required))
+                }),
+                initKeyword: .keyword(.`init`),
+                optionalMark: .postfixQuestionMarkToken(),
+                signature: FunctionSignatureSyntax(
+                    input: ParameterClauseSyntax(
+                        parameterList: [
+                            FunctionParameterSyntax(
+                                firstName: .identifier("coder"),
+                                type: SimpleTypeIdentifierSyntax(name: .identifier("NSCoder"))
+                            ),
+                        ]
+                    )
+                ),
+                body: CodeBlockSyntax(statements: [
+                    CodeBlockItemSyntax(
+                        item: .expr(ExprSyntax(FunctionCallExprSyntax(
+                            calledExpression: IdentifierExprSyntax(identifier: .identifier("fatalError")),
+                            leftParen: .leftParenToken(),
+                            argumentList: [
+                                TupleExprElementSyntax(
+                                    expression: StringLiteralExprSyntax(
+                                        openQuote: .stringQuoteToken(),
+                                        segments: [
+                                            .stringSegment(StringSegmentSyntax(
+                                                content: .stringSegment("Not implemented")
+                                            )),
+                                        ],
+                                        closeQuote: .stringQuoteToken()
+                                    )
+                                ),
+                            ],
+                            rightParen: .rightParenToken()
+                        )))
+                    ),
+                ])
+            )),
+        ]
+    }
 
-        return "(\(argument), \(literal: argument.description))"
+    enum Error: Swift.Error, CustomStringConvertible {
+        case onlyApplicableToClass
+
+        var description: String {
+            switch self {
+            case .onlyApplicableToClass:
+                return "@\(FatalCoderInit.self) can only be applied to a class"
+            }
+        }
     }
 }
 
 @main
 struct MacroPlaygroundPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        StringifyMacro.self,
+        FatalCoderInit.self,
     ]
 }
