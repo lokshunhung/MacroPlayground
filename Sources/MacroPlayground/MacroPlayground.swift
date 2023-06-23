@@ -1,3 +1,3 @@
 @attached(member, names: named(init))
-public macro FatalCoderInit() =
+public macro FatalCoderInit(message: String? = nil) =
     #externalMacro(module: "MacroPlaygroundMacros", type: "FatalCoderInit")

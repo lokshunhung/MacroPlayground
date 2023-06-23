@@ -40,17 +40,7 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
                             calledExpression: IdentifierExprSyntax(identifier: .identifier("fatalError")),
                             leftParen: .leftParenToken(),
                             argumentList: [
-                                TupleExprElementSyntax(
-                                    expression: StringLiteralExprSyntax(
-                                        openQuote: .stringQuoteToken(),
-                                        segments: [
-                                            .stringSegment(StringSegmentSyntax(
-                                                content: .stringSegment("Not implemented")
-                                            )),
-                                        ],
-                                        closeQuote: .stringQuoteToken()
-                                    )
-                                ),
+                                TupleExprElementSyntax(expression: errorMessageNode(from: node)),
                             ],
                             rightParen: .rightParenToken()
                         )))
@@ -58,6 +48,22 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
                 ])
             )),
         ]
+    }
+
+    private static func errorMessageNode(from node: AttributeSyntax) -> ExprSyntax {
+        if case .argumentList(let argumentList) = node.argument,
+           let node = argumentList.first?.expression {
+            return node
+        }
+        return ExprSyntax(StringLiteralExprSyntax(
+            openQuote: .stringQuoteToken(),
+            segments: [
+                .stringSegment(StringSegmentSyntax(
+                    content: .stringSegment("Not implemented")
+                )),
+            ],
+            closeQuote: .stringQuoteToken()
+        ))
     }
 
     enum Error: Swift.Error, CustomStringConvertible {

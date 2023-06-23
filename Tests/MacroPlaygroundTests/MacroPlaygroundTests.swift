@@ -102,4 +102,87 @@ final class MacroPlaygroundTests: XCTestCase {
             macros: testMacros
         )
     }
+
+    func testMacroCustomErrorMessage() {
+        assertMacroExpansion(
+            """
+            @FatalCoderInit(message: "A custom error message for init(coder:)")
+            class A: UIView {
+            }
+            """,
+            expandedSource: """
+            
+            class A: UIView {
+                required init?(coder: NSCoder) {
+                    fatalError("A custom error message for init(coder:)")
+                }
+            }
+            """,
+            macros: testMacros
+        )
+
+        assertMacroExpansion(
+            #"""
+            @FatalCoderInit(
+                message: """
+                A custom multiline
+                error message for init(coder:)
+                """
+            )
+            class A: UIView {
+            }
+            """#,
+            expandedSource: #"""
+
+            class A: UIView {
+                required init?(coder: NSCoder) {
+                    fatalError("""
+                        A custom multiline
+                        error message for init(coder:)
+                        """)
+                }
+            }
+            """#,
+            macros: testMacros
+        )
+    }
+
+    func testMacroCustomErrorMessageReference() {
+        assertMacroExpansion(
+            """
+            let message: String = "A top-level identifier for fatalError to reference to for error message"
+            @FatalCoderInit(message: message)
+            class A: UIView {
+            }
+            """,
+            expandedSource: """
+            let message: String = "A top-level identifier for fatalError to reference to for error message"
+            class A: UIView {
+                required init?(coder: NSCoder) {
+                    fatalError(message)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+
+        assertMacroExpansion(
+            """
+            @FatalCoderInit(message: A.fatalCoderMessage)
+            class A: UIView {
+                static let fatalCoderMessage: String = "A type-level identifier for fatalError to reference to for error message"
+            }
+            """,
+            expandedSource: """
+            
+            class A: UIView {
+                static let fatalCoderMessage: String = "A type-level identifier for fatalError to reference to for error message"
+                required init?(coder: NSCoder) {
+                    fatalError(A.fatalCoderMessage)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
 }

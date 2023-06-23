@@ -18,3 +18,11 @@ open class B: NSView {
         super.init(frame: .zero)
     }
 }
+
+let foo: String = "init(coder:) has not been implemented"
+@FatalCoderInit(message: foo)
+class C: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: .zero)
+    }
+}
