@@ -59,7 +59,7 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
             openQuote: .stringQuoteToken(),
             segments: [
                 .stringSegment(StringSegmentSyntax(
-                    content: .stringSegment("Not implemented")
+                    content: .stringSegment("init(coder:) has not been implemented")
                 )),
             ],
             closeQuote: .stringQuoteToken()

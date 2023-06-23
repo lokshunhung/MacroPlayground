@@ -19,7 +19,7 @@ final class MacroPlaygroundTests: XCTestCase {
             
             class A: UIView {
                 required init?(coder: NSCoder) {
-                    fatalError("Not implemented")
+                    fatalError("init(coder:) has not been implemented")
                 }
             }
             """,
@@ -38,7 +38,7 @@ final class MacroPlaygroundTests: XCTestCase {
             
             fileprivate final class A: UIView {
                 required init?(coder: NSCoder) {
-                    fatalError("Not implemented")
+                    fatalError("init(coder:) has not been implemented")
                 }
             }
             """,
@@ -54,7 +54,7 @@ final class MacroPlaygroundTests: XCTestCase {
             
             public class A: NSView {
                 required init?(coder: NSCoder) {
-                    fatalError("Not implemented")
+                    fatalError("init(coder:) has not been implemented")
                 }
             }
             """,
@@ -73,7 +73,7 @@ final class MacroPlaygroundTests: XCTestCase {
             
             open class A: UIView {
                 public required init?(coder: NSCoder) {
-                    fatalError("Not implemented")
+                    fatalError("init(coder:) has not been implemented")
                 }
             }
             """,
