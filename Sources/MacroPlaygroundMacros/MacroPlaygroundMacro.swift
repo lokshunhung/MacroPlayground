@@ -21,16 +21,15 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
             }
             ?? false
 
-        let modifier: String = isOpen ? "public" : ""
+        let modifier: String = isOpen ? "public " : ""
 
         let message: String = node.argument?.as(TupleExprElementListSyntax.self)?.first?.expression.description ?? #""init(coder:) has not been implemented""#
 
-        let initDecl: DeclSyntax = """
-        \(raw: modifier) required init?(coder: NSCoder) {
-            fatalError(\(raw: message))
+        let initDecl = try! InitializerDeclSyntax("\(raw: modifier)required init?(coder: NSCoder)") {
+            ExprSyntax("fatalError(\(raw: message))")
         }
-        """
-        return [initDecl]
+
+        return [DeclSyntax(initDecl)]
     }
 
     enum Error: Swift.Error, CustomStringConvertible {
