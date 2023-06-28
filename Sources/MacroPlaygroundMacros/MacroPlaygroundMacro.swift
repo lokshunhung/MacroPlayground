@@ -12,13 +12,7 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
         guard let classDecl = declaration.as(ClassDeclSyntax.self) else { throw Error.onlyApplicableToClass }
 
         let isOpen: Bool = classDecl.modifiers?
-            .contains { modifier in
-                if case .keyword(.open) = modifier.name.tokenKind {
-                    true
-                } else {
-                    false
-                }
-            }
+            .contains { modifier in modifier.name.text == "open" }
             ?? false
 
         let modifier: String = isOpen ? "public " : ""
@@ -38,7 +32,7 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
         var description: String {
             switch self {
             case .onlyApplicableToClass:
-                return "@\(FatalCoderInit.self) can only be applied to a class"
+                "@\(FatalCoderInit.self) can only be applied to a class"
             }
         }
     }
