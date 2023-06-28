@@ -10,60 +10,27 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         guard let classDecl = declaration.as(ClassDeclSyntax.self) else { throw Error.onlyApplicableToClass }
-        let declModifiers: [Keyword] = classDecl.modifiers?.map(\.name.tokenKind).compactMap { tokenKind in
-            guard case TokenKind.keyword(let keyword) = tokenKind else { return nil }
-            return keyword
-        } ?? []
-        return [
-            DeclSyntax(InitializerDeclSyntax(
-                modifiers: ModifierListSyntax(itemsBuilder: {
-                    if declModifiers.contains(where: { $0 == .open }) {
-                        DeclModifierSyntax(name: .keyword(.public))
-                    }
-                    DeclModifierSyntax(name: .keyword(.required))
-                }),
-                initKeyword: .keyword(.`init`),
-                optionalMark: .postfixQuestionMarkToken(),
-                signature: FunctionSignatureSyntax(
-                    input: ParameterClauseSyntax(
-                        parameterList: [
-                            FunctionParameterSyntax(
-                                firstName: .identifier("coder"),
-                                type: SimpleTypeIdentifierSyntax(name: .identifier("NSCoder"))
-                            ),
-                        ]
-                    )
-                ),
-                body: CodeBlockSyntax(statements: [
-                    CodeBlockItemSyntax(
-                        item: .expr(ExprSyntax(FunctionCallExprSyntax(
-                            calledExpression: IdentifierExprSyntax(identifier: .identifier("fatalError")),
-                            leftParen: .leftParenToken(),
-                            argumentList: [
-                                TupleExprElementSyntax(expression: errorMessageNode(from: node)),
-                            ],
-                            rightParen: .rightParenToken()
-                        )))
-                    ),
-                ])
-            )),
-        ]
-    }
 
-    private static func errorMessageNode(from node: AttributeSyntax) -> ExprSyntax {
-        if case .argumentList(let argumentList) = node.argument,
-           let node = argumentList.first?.expression {
-            return node
+        let isOpen: Bool = classDecl.modifiers?
+            .contains { modifier in
+                if case .keyword(.open) = modifier.name.tokenKind {
+                    true
+                } else {
+                    false
+                }
+            }
+            ?? false
+
+        let modifier: String = isOpen ? "public" : ""
+
+        let message: String = node.argument?.as(TupleExprElementListSyntax.self)?.first?.expression.description ?? #""init(coder:) has not been implemented""#
+
+        let initDecl: DeclSyntax = """
+        \(raw: modifier) required init?(coder: NSCoder) {
+            fatalError(\(raw: message))
         }
-        return ExprSyntax(StringLiteralExprSyntax(
-            openQuote: .stringQuoteToken(),
-            segments: [
-                .stringSegment(StringSegmentSyntax(
-                    content: .stringSegment("init(coder:) has not been implemented")
-                )),
-            ],
-            closeQuote: .stringQuoteToken()
-        ))
+        """
+        return [initDecl]
     }
 
     enum Error: Swift.Error, CustomStringConvertible {
