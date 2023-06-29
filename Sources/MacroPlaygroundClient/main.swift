@@ -26,3 +26,16 @@ class C: NSView {
         super.init(frame: .zero)
     }
 }
+
+@ObservableObject
+public final class VM {
+    @NotPublished
+    public var a: Int
+
+    public var b: Bool
+
+    public init(a: Int, b: Bool) {
+        self.a = a
+        self.b = b
+    }
+}

@@ -5,5 +5,7 @@ import SwiftSyntaxMacros
 struct MacroPlaygroundPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         FatalCoderInitMacro.self,
+        ObservableObjectMacro.self,
+        NotPublishedMacro.self,
     ]
 }
