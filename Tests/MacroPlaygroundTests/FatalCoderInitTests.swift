@@ -4,10 +4,10 @@ import XCTest
 import MacroPlaygroundMacros
 
 let testMacros: [String: Macro.Type] = [
-    "FatalCoderInit": FatalCoderInit.self,
+    "FatalCoderInit": FatalCoderInitMacro.self,
 ]
 
-final class MacroPlaygroundTests: XCTestCase {
+final class FatalCoderInitTests: XCTestCase {
     func testMacroBaseline() {
         assertMacroExpansion(
             """

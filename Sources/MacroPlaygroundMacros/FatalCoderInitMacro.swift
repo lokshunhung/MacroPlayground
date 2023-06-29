@@ -1,9 +1,8 @@
-import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
+public struct FatalCoderInitMacro: SwiftSyntaxMacros.MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -72,15 +71,8 @@ public struct FatalCoderInit: SwiftSyntaxMacros.MemberMacro {
         var description: String {
             switch self {
             case .onlyApplicableToClass:
-                return "@\(FatalCoderInit.self) can only be applied to a class"
+                return "@FatalCoderInit can only be applied to a class"
             }
         }
     }
-}
-
-@main
-struct MacroPlaygroundPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
-        FatalCoderInit.self,
-    ]
 }
