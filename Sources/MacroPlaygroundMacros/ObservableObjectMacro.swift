@@ -19,20 +19,32 @@ public struct NotPublishedMacro: SwiftSyntaxMacros.AccessorMacro {
     }
 }
 
-public struct ObservableObjectMacro:
-    SwiftSyntaxMacros.ConformanceMacro,
-    SwiftSyntaxMacros.MemberAttributeMacro
-{
+public struct ObservableObjectMacro {}
+
+extension ObservableObjectMacro: SwiftSyntaxMacros.ConformanceMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingConformancesOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
+        let inheritanceList: InheritedTypeListSyntax? =
+            declaration.as(ClassDeclSyntax.self)?.inheritanceClause?.inheritedTypeCollection ??
+            declaration.as(StructDeclSyntax.self)?.inheritanceClause?.inheritedTypeCollection
+        for inheritance in inheritanceList ?? [] {
+            let inheritedType = inheritance.typeName.as(SimpleTypeIdentifierSyntax.self)?
+                .name.tokenKind
+            if inheritedType == .identifier("ObservableObject") {
+                context.addDiagnostics(from: Error.unnecessaryObservableObjectConformance, node: inheritance)
+                return []
+            }
+        }
         return [
-            (TypeSyntax(SimpleTypeIdentifierSyntax(name: .identifier("ObservableObject"))), nil),
+            (TypeSyntax(stringLiteral: "ObservableObject"), nil),
         ]
     }
-    
+}
+
+extension ObservableObjectMacro: SwiftSyntaxMacros.MemberAttributeMacro {
     public static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
@@ -71,10 +83,13 @@ public struct ObservableObjectMacro:
 
 extension ObservableObjectMacro {
     enum Error: Swift.Error, CustomStringConvertible {
+        case unnecessaryObservableObjectConformance
         case unnecessaryPublishedAttr
 
         var description: String {
             switch self {
+            case .unnecessaryObservableObjectConformance:
+                "Unnecessary ObservableObject conformance"
             case .unnecessaryPublishedAttr:
                 "Unnecessary @Published attribute"
             }

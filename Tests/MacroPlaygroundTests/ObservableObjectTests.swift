@@ -23,7 +23,6 @@ final class ObservableObjectTests: XCTestCase {
             public class VM {
                 @NotPublished
                 public var a: Int
-
                 public var b: Bool
 
                 public init(a: Int, b: Bool) {
@@ -37,16 +36,35 @@ final class ObservableObjectTests: XCTestCase {
             public class VM {
                 public var a: Int
                 @Published
-                public var b: Bool
+                    public var b: Bool
 
                 public init(a: Int, b: Bool) {
                     self.a = a
                     self.b = b
                 }
             }
-
-            extension VM: ObservableObject {}
+            extension VM: ObservableObject {
+            }
             """,
+            macros: testMacros
+        )
+    }
+
+    func testMacroThrowsIfManualConformanceToObservableObject() throws {
+        assertMacroExpansion(
+            """
+            @ObservableObject
+            public class VM: ObservableObject {
+            }
+            """,
+            expandedSource: """
+
+            public class VM: ObservableObject {
+            }
+            """,
+            diagnostics: [
+                .init(message: "Unnecessary ObservableObject conformance", line: 2, column: 18),
+            ],
             macros: testMacros
         )
     }
