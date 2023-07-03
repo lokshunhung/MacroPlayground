@@ -3,7 +3,7 @@ import SwiftSyntaxMacrosTestSupport
 import XCTest
 import MacroPlaygroundMacros
 
-let testMacros: [String: Macro.Type] = [
+private let testMacros: [String: Macro.Type] = [
     "FatalCoderInit": FatalCoderInitMacro.self,
 ]
 
