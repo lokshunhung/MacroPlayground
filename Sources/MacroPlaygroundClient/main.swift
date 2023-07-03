@@ -39,4 +39,9 @@ struct Obj {
     fileprivate func bar(_ a: Int, b bb: Bool, c: Character) {
         print("T")
     }
+
+    @Synchronized(modifier: .public)
+    fileprivate func boom(_ a: Int, b bb: Bool, c: Character) {
+        print("T")
+    }
 }

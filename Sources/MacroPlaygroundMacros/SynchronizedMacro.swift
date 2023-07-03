@@ -49,7 +49,6 @@ extension SynchronizedMacro: SwiftSyntaxMacros.PeerMacro {
 
         let argument = node
             .argument?.as(TupleExprElementListSyntax.self)?.first?
-            .expression.as(TupleExprElementSyntax.self)?
             .expression.as(MemberAccessExprSyntax.self)?
             .name.text
         let keyword = argument.flatMap(Keyword.modifierFrom(string:))
@@ -61,7 +60,7 @@ extension SynchronizedMacro: SwiftSyntaxMacros.PeerMacro {
                     DeclModifierSyntax(name: .keyword(keyword))
                 }
                 for modifier in fnDecl.modifiers ?? [] {
-                    if modifier.detail == nil {
+                    if modifier.detail != nil {
                         modifier
                     }
                 }
