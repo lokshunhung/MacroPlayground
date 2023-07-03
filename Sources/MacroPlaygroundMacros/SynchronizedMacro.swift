@@ -2,7 +2,42 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct SynchronizedMacro: SwiftSyntaxMacros.PeerMacro {
+public struct SynchronizedMacro {}
+
+// TODO: Wait until we can provide additional attributes to the attached declaration...
+// Then we can do:
+//
+//       @Synchronized
+//       func foo(a int: Int, _ b: Bool, c: Character) {
+//           bar()
+//       }
+//
+//       // generated:
+//
+//       @_disfavoredOverload // <-- this cannot be generated yet
+//       func foo(a int: Int, _ b: Bool, c: Character) {
+//           bar()
+//       }
+//
+//       func foo(a int: Int, _ b: Bool, c: Character, _ _ignore: Void = ()) {
+//           lock.withLock {
+//               foo(a: int, b, c: c)
+//           }
+//       }
+//
+// Right now, this macro generates a peer declaration with a prefix of `$` :(
+//
+//extension SynchronizedMacro: SwiftSyntaxMacros.AttributeMacro {
+//    public static func expansion(
+//        of node: AttributeSyntax,
+//        providingAttributesFor declaration: some DeclSyntaxProtocol,
+//        in context: some MacroExpansionContext
+//    ) throws -> [AttributeSyntax] {
+//        return []
+//    }
+//}
+
+extension SynchronizedMacro: SwiftSyntaxMacros.PeerMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
