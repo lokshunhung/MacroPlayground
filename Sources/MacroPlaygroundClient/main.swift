@@ -26,3 +26,17 @@ class C: NSView {
         super.init(frame: .zero)
     }
 }
+
+struct Obj {
+    private let lock: Lock
+
+    @Synchronized
+    func foo(_ a: Int, b bb: Bool, c: Character) {
+        print("T")
+    }
+
+    @Synchronized(modifier: .attached)
+    fileprivate func bar(_ a: Int, b bb: Bool, c: Character) {
+        print("T")
+    }
+}
