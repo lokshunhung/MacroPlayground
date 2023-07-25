@@ -6,5 +6,6 @@ struct MacroPlaygroundPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         FatalCoderInitMacro.self,
         SynchronizedMacro.self,
+        ParameterizedMacro.self,
     ]
 }
