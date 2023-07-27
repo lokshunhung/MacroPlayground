@@ -57,5 +57,13 @@ let package = Package(
                 "MacroPlaygroundMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]),
+
+        .testTarget(
+            name: "TempTests",
+            dependencies: [
+                "MacroPlayground",
+                "MacroPlaygroundMacros",
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+            ]),
     ]
 )
